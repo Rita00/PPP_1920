@@ -12,8 +12,7 @@
 #include <memory.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include "Pilha_alunos.h"
-#include "Pilha_disciplinas.h"
+#include "Pilhas.h"
 
 #define INT_DIM 19
 #define DIM 200
@@ -33,7 +32,7 @@ int main(int argc, char *argv[]) {
     fclose(file_alunos);
 
     FILE *file_notas = fopen(argv[2], "r");
-    pilha_disc = read_provas(file_notas);
+    read_provas(file_notas);
     fclose(file_notas);
 
     classificacao_final();
@@ -41,31 +40,27 @@ int main(int argc, char *argv[]) {
     disciplina pesq_disciplina;
     aluno pesq_aluno;
 
-    verfica_aprov(pilha_al);
+    verfica_aprov();
 
     long opcao = 1;
     long num_aluno;
     char disciplina[DIM];
     while (opcao != 0) {
-        printf("1 - Listagem de alunos\n");
-        printf("2 - Listagem de disciplinas\n");
-        printf("3 - Listagem disciplinas de uma aluno\n");
-        printf("4 - Listagem alunos de uma disciplina\n");
-        printf("5 - Listagem Classificaçoes finais\n");
-        printf("6 - Remover aluno\n");
-        printf("7 - Remover disciplina\n");
-        printf("8 - Programa\n");
-        printf("0 - Sair\n");
+        printf("1 - Listagem de alunos - For Testing Purposes Only\n");
+        printf("2 - Listagem de disciplinas - For Testing Purposes Only\n");
+        printf("3 - Listagem disciplinas de uma aluno - For Testing Purposes Only\n");
+        printf("4 - Listagem alunos de uma disciplina - For Testing Purposes Only\n");
+        printf("5 - Listagem Classificaçoes finais - For Testing Purposes Only\n");
+        printf("6 - Remover aluno - For Testing Purposes Only\n");
+        printf("7 - Remover disciplina - For Testing Purposes Only\n");
+        printf("0 - Programa e Sair\n");
         get_number(&opcao);
         switch (opcao) {
             case 1:
-                print_lista_alunos(pilha_al);
+                print_lista_alunos();
                 break;
             case 2:
-                print_pilha_disciplinas(pilha_disc);
-                //printf("Numero de aluno a remover:\n");
-                //get_number(&num_aluno);
-                //remove_aluno(num_aluno, pilha_al); //todo remove aluno
+                print_pilha_disciplinas();
                 break;
             case 3:
                 printf("Numero de aluno:\n");
@@ -88,18 +83,19 @@ int main(int argc, char *argv[]) {
                 print_alunos_disciplina(pesq_disciplina->alunos);
                 break;
             case 5:
-                print_class_final(pilha_al);
+                print_class_final();
                 break;
             case 6:
-                printf("Numero de aluno\n");get_number(&num_aluno);
+                printf("Numero de aluno\n");
+                get_number(&num_aluno);
                 pesq_aluno = pesquisa_aluno(num_aluno);
                 if (pesq_aluno == NULL) {
                     printf("Aluno Inexistente\n");
                     break;
                 }
-                pilha_al = remove_aluno(pesq_aluno);
+                remove_aluno(pesq_aluno);
                 break;
-            case 7:
+            case 7: //
                 printf("Nome da disciplina\n");
                 fgets(disciplina, DIM, stdin);
                 pesq_disciplina = pesquisa_disciplina(elimina_final(disciplina));
@@ -107,23 +103,18 @@ int main(int argc, char *argv[]) {
                     printf("Disciplina Inexistente\n");
                     break;
                 }
-                pilha_disc = remove_disciplina(pesq_disciplina);
-                break;
-            case 8:
-
-                break;
-            case 0:
+                remove_disciplina(pesq_disciplina);
                 break;
             default:
                 break;
         }
     }
-    write_output(pilha_disc);
-    alunos_aprov_file(pilha_al);
+    write_output();
+    alunos_aprov_file();
     destroi_pilha_alunos(1);
-    destroi_pilha_disciplinas(pilha_disc);
-}
-;
+    destroi_pilha_disciplinas();
+};
+
 //Protecao de dados
 void clear_input() {
     char aux;
@@ -197,3 +188,4 @@ char *rtrim(char *s) {
 char *trim(char *s) {
     return rtrim(ltrim(s));
 }
+
