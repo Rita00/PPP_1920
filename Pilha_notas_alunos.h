@@ -17,9 +17,13 @@ void print_pilha_disciplinas_aluno(pilha_disciplinas_aluno pilha);
 
 void destroi_lista_disciplinas(pilha_disciplinas_aluno pilha);
 
-no_disciplina read_provas(FILE *input_file, no_aluno pilha, no_disciplina pilha_disc);
+pilha_disciplinas read_provas(FILE *input_file, pilha_alunos pilha_al, pilha_disciplinas pilha_disc);
 
-no_disciplina validar_fich_disc(char *linha, int num_linha, no_aluno lista, no_disciplina pilha_disc);
+pilha_disciplinas validar_fich_disc(char *linha, int num_linha, pilha_alunos pilha_al, pilha_disciplinas pilha_disc);
+
+void classificacao_final(pilha_alunos pilha);
+
+void print_class_final(pilha_alunos pilha);
 
 #endif //PPP_2020_PILHA_NOTAS_ALUNOS_H
 

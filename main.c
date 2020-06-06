@@ -3,7 +3,7 @@
  * o segundo ficheiro as respetivas disciplinas e notas*/
 
 /*O programa é composto por uma pilha de alunos
- * cada elemento (aluno) dessa pilha é constituido por uma pilha de disciplinas*/
+ * cada elemento (aluno) dessa pilha é constituido por uma pilha de disciplinas que contém as respetivas notas*/
 
 /*Paralelamente será construida uma pilha de disciplinas
  * cada elemento (disciplina) é constituído por uma pilha (ordenada alfabeticamente) de alunos que a frequentam*/
@@ -13,8 +13,6 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "Pilha_alunos.h"
-#include "Pilha_notas_alunos.h"
-#include "structs.h"
 #include "Pilha_disciplinas.h"
 
 #define INT_DIM 19
@@ -25,20 +23,27 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Sem argumentos\n");
         return -1;
     }
-    no_aluno pilha_alunos = NULL;
-    no_disciplina pilha_disc = NULL;
+    pilha_alunos pilha_alunos = NULL;
+    pilha_disciplinas pilha_disc = NULL;
     FILE *file_alunos = fopen(argv[1], "r"); //todo ficheiro errado print erro
     pilha_alunos = read_alunos_num(file_alunos, pilha_alunos);
     FILE *file_notas = fopen(argv[2], "r");
     pilha_disc = read_provas(file_notas, pilha_alunos, pilha_disc);
+    classificacao_final(pilha_alunos);
+    disciplina pesq_disciplina;
+    aluno pesq_aluno;
+    verfica_aprov(pilha_alunos);
     long opcao = 1;
     long num_aluno;
     char disciplina[DIM];
     while (opcao != 0) {
         printf("1 - Listagem de alunos\n");
+        printf("2 - Listagem de disciplinas\n");
         printf("3 - Listagem disciplinas de uma aluno\n");
-        printf("4 - Listagem Pilha disciplinas\n");
-        printf("5 - Listagem alunos de uma disciplina\n");
+        printf("4 - Listagem alunos de uma disciplina\n");
+        printf("5 - Listagem Classificaçoes finais\n");
+        printf("6 - Remover aluno\n");
+        printf("7 - Remover disciplina\n");
         printf("0 - Sair\n");
         get_number(&opcao);
         switch (opcao) {
@@ -46,28 +51,62 @@ int main(int argc, char *argv[]) {
                 print_lista_alunos(pilha_alunos);
                 break;
             case 2:
-                printf("Numero de aluno a remover:\n");
-                get_number(&num_aluno);
-                remove_aluno(num_aluno, pilha_alunos);
+                print_pilha_disciplinas(pilha_disc);
+                //printf("Numero de aluno a remover:\n");
+                //get_number(&num_aluno);
+                //remove_aluno(num_aluno, pilha_alunos); //todo remove aluno
                 break;
             case 3:
                 printf("Numero de aluno:\n");
                 get_number(&num_aluno);
-                print_pilha_disciplinas_aluno(pesquisa_aluno(num_aluno, pilha_alunos)->pilha_notas);
-            case 4:
-                print_pilha_disciplinas(pilha_disc);
+                pesq_aluno = pesquisa_aluno(num_aluno, pilha_alunos);
+                if (pesq_aluno == NULL) {
+                    printf("Aluno Inexistente\n");
+                    break;
+                }
+                print_pilha_disciplinas_aluno(pesq_aluno->pilha_notas);
                 break;
-            case 5:
+            case 4:
                 printf("Nome da disciplina\n");
                 fgets(disciplina, DIM, stdin);
-                print_alunos_disciplina(pesquisa_disciplina(elimina_final(disciplina), pilha_disc)->alunos);
+                pesq_disciplina = pesquisa_disciplina(elimina_final(disciplina), pilha_disc);
+                if (pesq_disciplina == NULL) {
+                    printf("Disciplina Inexistente\n");
+                    break;
+                }
+                print_alunos_disciplina(pesq_disciplina->alunos);
+                break;
+            case 5:
+                print_class_final(pilha_alunos);
+                break;
+            case 6:
+                printf("Numero de aluno\n");get_number(&num_aluno);
+                pesq_aluno = pesquisa_aluno(num_aluno, pilha_alunos);
+                if (pesq_aluno == NULL) {
+                    printf("Aluno Inexistente\n");
+                    break;
+                }
+                pilha_alunos = remove_aluno(pesq_aluno, pilha_alunos);
+                break;
+            case 7:
+                printf("Nome da disciplina\n");
+                fgets(disciplina, DIM, stdin);
+                pesq_disciplina = pesquisa_disciplina(elimina_final(disciplina), pilha_disc);
+                if (pesq_disciplina == NULL) {
+                    printf("Disciplina Inexistente\n");
+                    break;
+                }
+                pilha_disc = pop_disciplina(pesq_disciplina, pilha_disc);
+                break;
             case 0:
                 break;
             default:
                 break;
         }
     }
-    destroi_lista_alunos(pilha_alunos);
+    write_output(pilha_disc);
+    alunos_aprov_file(pilha_alunos);
+    destroi_pilha_alunos(pilha_alunos, 1);
     destroi_pilha_disciplinas(pilha_disc);
 }
 

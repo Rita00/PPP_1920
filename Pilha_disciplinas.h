@@ -3,16 +3,20 @@
 
 #include "structs.h"
 
-no_disciplina push_disciplina(char *disc, no_disciplina pilha_disc);
+pilha_disciplinas push_disciplina(char *disc, pilha_disciplinas pilha);
 
-no_aluno push_aluno_to_disc(no_aluno aluno, no_aluno pilha_alunos_disciplina);
+pilha_disciplinas pop_disciplina(disciplina pop_disciplina, pilha_disciplinas pilha);
 
-void print_pilha_disciplinas(no_disciplina pilha_disc);
+pilha_alunos push_aluno_to_disc(aluno aluno, pilha_alunos pilha_alunos_disciplina);
 
-void print_alunos_disciplina(no_aluno pilha);
+void print_pilha_disciplinas(pilha_disciplinas pilha);
 
-no_disciplina pesquisa_disciplina(char *disiciplina, no_disciplina pilha_disc);
+void print_alunos_disciplina(pilha_alunos pilha);
 
-void destroi_pilha_disciplinas(no_disciplina pilha_disc);
+disciplina pesquisa_disciplina(char *disiciplina, pilha_disciplinas pilha);
+
+void destroi_pilha_disciplinas(pilha_disciplinas pilha);
+
+void write_output(pilha_disciplinas pilha);
 
 #endif //PPP_2020_PILHA_DISCIPLINAS_H

@@ -1,10 +1,10 @@
 #ifndef PPP_2020_STRUCTS_H
 #define PPP_2020_STRUCTS_H
 
-typedef struct _alunos *no_aluno;
+typedef struct _alunos *aluno;
 typedef struct _pilha_alunos *pilha_alunos;
 typedef struct _notas_alunos *pilha_disciplinas_aluno;
-typedef struct _disciplinas *no_disciplina;
+typedef struct _disciplinas *disciplina;
 typedef struct _pilha_disciplinas *pilha_disciplinas;
 
 //Estrutura que guarda informacao na pilha (pilha alunos) com o nome e numeros de estudantes
@@ -12,11 +12,11 @@ struct _alunos {
     char *nome_aluno;
     long num_est;
     pilha_disciplinas_aluno pilha_notas;
-    no_aluno next; //todo remove
+    int aproved;
 };
 
 struct _pilha_alunos{
-    no_aluno novo_aluno;
+    aluno info_aluno;
     pilha_alunos next;
 };
 
@@ -27,18 +27,18 @@ struct _notas_alunos {
     float nota2;
     char *prova1;
     char *prova2;
+    float med_final;
     pilha_disciplinas_aluno next;
 };
 
 //Estrutura que guarda informacao dos alunos de determinada disciplina
 struct _disciplinas{
-    char *disciplina;
-    no_aluno alunos;
-    no_disciplina next; //todo remove
+    char *disc;
+    pilha_alunos alunos;
 };
 
 struct _pilha_disciplinas{
-    no_disciplina nova_disciplina;
+    disciplina disciplina;
     pilha_disciplinas next;
 };
 

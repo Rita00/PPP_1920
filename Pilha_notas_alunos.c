@@ -95,22 +95,23 @@ void destroi_lista_disciplinas(pilha_disciplinas_aluno pilha) {
     }
 }
 
-pilha_disciplinas read_provas(FILE *input_file, no_aluno pilha, pilha_disciplinas pilha_disc) {
+pilha_disciplinas read_provas(FILE *input_file, pilha_alunos pilha_al, pilha_disciplinas pilha_disc) {
     char linha[DIM];
     int num_linha = 1;
     while (fgets(linha, DIM, input_file)) {
-        pilha_disc = validar_fich_disc(elimina_final(linha), num_linha, pilha, pilha_disc);
+        pilha_disc = validar_fich_disc(elimina_final(linha), num_linha, pilha_al, pilha_disc);
         num_linha++;
     }
     return pilha_disc;
 }
 
-pilha_disciplinas validar_fich_disc(char *linha, int num_linha, no_aluno lista, pilha_disciplinas pilha_disc) {
+pilha_disciplinas validar_fich_disc(char *linha, int num_linha, pilha_alunos pilha_al, pilha_disciplinas pilha_disc) {
     int num_est;
-    char *disciplina;
+    char *discp;
     char *prova;
     float nota;
-    no_aluno aluno;
+    aluno aluno;
+    disciplina disc;
     regex_t linha_fich_0_19, linha_fich_20;
 
     regcomp(&linha_fich_0_19, "[0-9]+#[A-Za-z]+#[Pp][Rr][Oo][Vv][Aa][12]#[01]*[0-9].[0-9][0-9]*$", REG_EXTENDED);
@@ -118,22 +119,54 @@ pilha_disciplinas validar_fich_disc(char *linha, int num_linha, no_aluno lista, 
 
     if (regexec(&linha_fich_0_19, linha, 0, NULL, 0) == 0 || regexec(&linha_fich_20, linha, 0, NULL, 0) == 0) {
         num_est = atoi(strtok(linha, "#"));
-        aluno = pesquisa_aluno(num_est, lista);
+        aluno = pesquisa_aluno(num_est, pilha_al);
         if (aluno == NULL) {
             printf("Numero invalido\n");
             return pilha_disc;
         }
-        disciplina = strdup(strtok(NULL, "#"));
+        discp = strdup(strtok(NULL, "#"));
         prova = strdup(strtok(NULL, "#"));
         nota = atof(strtok(NULL, "\n")); //todo mudar atoi e atof
 
-        aluno->pilha_notas = push_dis_to_aluno(prova, nota, disciplina, aluno->pilha_notas);
-        pilha_disc = push_disciplina(disciplina, pilha_disc);
-        pilha_disc->alunos = push_aluno_to_disc(aluno, pilha_disc->alunos);
+        aluno->pilha_notas = push_dis_to_aluno(prova, nota, discp, aluno->pilha_notas);
+        pilha_disc = push_disciplina(discp, pilha_disc);
+        disc = pesquisa_disciplina(discp, pilha_disc);
+        if(disc == NULL){
+            printf("Disciplina Inexistente\n");
+            return pilha_disc;
+        }
+        disc->alunos = push_aluno_to_disc(aluno, disc->alunos);
         return pilha_disc;
 
     } else {
         fprintf(stderr, "Erro ao ler linha %d do ficheiro\n", num_linha);
     }
     return pilha_disc;
+}
+
+void classificacao_final(pilha_alunos pilha){
+    pilha_disciplinas_aluno aux;
+    if(pilha == NULL) return; //todo print pilha vazia??
+    while(pilha != NULL){
+        aux = pilha->info_aluno->pilha_notas;
+        while(aux != NULL){
+            aux->med_final = (aux->nota1 + aux->nota2)/2;
+            aux = aux->next;
+        }
+        pilha = pilha->next;
+    }
+}
+
+void print_class_final(pilha_alunos pilha){
+    pilha_disciplinas_aluno aux;
+    if(pilha == NULL) return;
+    while(pilha != NULL){
+        printf("%s:\n",  pilha->info_aluno->nome_aluno);
+        aux = pilha->info_aluno->pilha_notas;
+        while(aux != NULL){
+            printf("\t%s: %f\n", aux->disciplina, aux->med_final);
+            aux = aux->next;
+        }
+        pilha = pilha->next;
+    }
 }
