@@ -7,6 +7,9 @@ typedef struct _notas_alunos *pilha_disciplinas_aluno;
 typedef struct _disciplinas *disciplina;
 typedef struct _pilha_disciplinas *pilha_disciplinas;
 
+static pilha_alunos pilha_al;
+static pilha_disciplinas pilha_disc;
+
 //Estrutura que guarda informacao na pilha (pilha alunos) com o nome e numeros de estudantes
 struct _alunos {
     char *nome_aluno;

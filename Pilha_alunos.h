@@ -8,22 +8,22 @@
 /*Interface para a pilha que guarda a informacao do ficheiro de entrada "Lista_alunos_num_est.txt"*/
 aluno aloc_aluno(char *nome, int num);
 
-pilha_alunos push_aluno(char *nome, int num, pilha_alunos pilha);
+void push_aluno(char *nome, int num);
 
-pilha_alunos read_alunos_num(FILE *input_file, pilha_alunos pilha);
+void read_alunos_num(FILE *input_file);
 
-void print_lista_alunos(pilha_alunos pilha);
+void print_lista_alunos();
 
-void destroi_pilha_alunos(pilha_alunos pilha, char destroi_info);
+void destroi_pilha_alunos(char destroi_info);
 
-aluno pesquisa_aluno(long num_aluno, pilha_alunos pilha);
+aluno pesquisa_aluno(long num_aluno);
 
-pilha_alunos remove_aluno(aluno pop_aluno, pilha_alunos pilha);
+pilha_alunos remove_aluno(aluno pop_aluno);
 
-pilha_alunos validar_fich_alunos(char *linha, int num, pilha_alunos pilha);
+void validar_fich_alunos(char *linha, int num);
 
-void verfica_aprov(pilha_alunos pilha);
+void verfica_aprov();
 
-void alunos_aprov_file(pilha_alunos pilha);
+void alunos_aprov_file();
 
 #endif //PPP_2020_PILHA_ALUNOS_H

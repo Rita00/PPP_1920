@@ -16,40 +16,36 @@ aluno aloc_aluno(char *nome, int num){
     return novo_aluno;
 }
 
-
 /*Inserir na lista*/
-pilha_alunos push_aluno(char *nome, int num, pilha_alunos pilha) {
+void push_aluno(char *nome, int num) {
     pilha_alunos novo_aluno = (pilha_alunos)calloc(1, sizeof(struct _pilha_alunos));
-    pilha_alunos aux = pilha;
+    pilha_alunos aux = pilha_al;
 
-    if (!pilha || strcasecmp(pilha->info_aluno->nome_aluno, nome) >= 0) {
-        if (pilha && strcasecmp(pilha->info_aluno->nome_aluno, nome) == 0) {
+    if (!aux || strcasecmp(aux->info_aluno->nome_aluno, nome) >= 0) {
+        if (aux && strcasecmp(aux->info_aluno->nome_aluno, nome) == 0) {
             printf("Nome ja exixtente\n");
-            return pilha;
         }
         novo_aluno->info_aluno = aloc_aluno(nome, num);
-        novo_aluno->next = pilha;
-        return novo_aluno;
+        novo_aluno->next = aux;
+        pilha_al = novo_aluno;
     } else {
         while (aux->next && strcasecmp(aux->next->info_aluno->nome_aluno, nome) < 0) {
             aux = aux->next;
         }
         if (aux->next && strcasecmp(aux->next->info_aluno->nome_aluno, nome) == 0) {
             printf("Nome ja existente\n");
-            return pilha;
         } else {
             novo_aluno->info_aluno = aloc_aluno(nome, num);
             novo_aluno->next = aux->next;
             aux->next = novo_aluno;
         }
     }
-    return pilha;
 }
 
 /*Pesquisar determinado aluno por nome*/
-aluno pesquisa_aluno(long num_aluno, pilha_alunos pilha) { //todo change return ???
-    pilha_alunos aux = pilha;
-    if (pilha == NULL) {
+aluno pesquisa_aluno(long num_aluno) { //todo change return ???
+    pilha_alunos aux = pilha_al;
+    if (pilha_al == NULL) {
         printf("Lista Vazia\n");
     } else {
         while (aux && aux->info_aluno->num_est != num_aluno) {
@@ -63,18 +59,18 @@ aluno pesquisa_aluno(long num_aluno, pilha_alunos pilha) { //todo change return 
 }
 
 /*Remover um aluno da lista*/
-pilha_alunos remove_aluno(aluno pop_aluno, pilha_alunos pilha) {
-    pilha_alunos aux = pilha, aux_rem;
+pilha_alunos remove_aluno(aluno pop_aluno) {
+    pilha_alunos aux = pilha_al, aux_rem;
 
-    if (pilha == NULL) {
+    if (pilha_al == NULL) {
         printf("Lista Vazia\n");
-        return pilha;
-    } else if (pilha->next == NULL) { //A lista tem apenas 1 no
-        free(pilha);
-        return pilha;
-    }else if(pilha->info_aluno == pop_aluno){ //Primeiro aluno da pilha a remover
-        aux_rem = pilha->next;
-        free(pilha);
+        return pilha_al;
+    } else if (pilha_al->next == NULL) { //A lista tem apenas 1 no
+        free(pilha_al);
+        return pilha_al;
+    }else if(pilha_al->info_aluno == pop_aluno){ //Primeiro aluno da pilha a remover
+        aux_rem = pilha_al->next;
+        free(pilha_al);
         return aux_rem;
     } else {
         while (aux && aux->next && aux->next->info_aluno != pop_aluno) {
@@ -82,35 +78,33 @@ pilha_alunos remove_aluno(aluno pop_aluno, pilha_alunos pilha) {
         }
         if (aux->next == NULL) {
             printf("Numero de aluno inexistente\n");
-            return pilha;
+            return pilha_al;
         }
         aux_rem = aux->next->next;
         free(aux->next);
         aux->next = aux_rem;
-        return pilha;
+        return pilha_al;
     }
 }
 
-
-
 /*Imprime lista alunos*/
-void print_lista_alunos(pilha_alunos pilha) {
-    if (pilha == NULL) {
+void print_lista_alunos() {
+    if (pilha_al == NULL) {
         printf("Lista Vazia\n");
         return;
     }
-    while (pilha != NULL) {
-        printf("%s %ld\n", pilha->info_aluno->nome_aluno, pilha->info_aluno->num_est);
-        pilha = pilha->next;
+    while (pilha_al != NULL) {
+        printf("%s %ld\n", pilha_al->info_aluno->nome_aluno, pilha_al->info_aluno->num_est);
+        pilha_al = pilha_al->next;
     }
 }
 
 /*Destroi lista*/
-void destroi_pilha_alunos(pilha_alunos pilha, char destroi_info) {
+void destroi_pilha_alunos(char destroi_info) {
     pilha_alunos aux;
-    while (pilha != NULL) {
-        aux = pilha;
-        pilha = pilha->next;
+    while (pilha_al != NULL) {
+        aux = pilha_al;
+        pilha_al = pilha_al->next;
         if (destroi_info && aux->info_aluno != NULL){
             if(aux->info_aluno->pilha_notas != NULL)
                 destroi_lista_disciplinas(aux->info_aluno->pilha_notas);
@@ -121,18 +115,17 @@ void destroi_pilha_alunos(pilha_alunos pilha, char destroi_info) {
 }
 
 /*Le ficheiro de texto recebido como input e insere alunos na lista*/
-pilha_alunos read_alunos_num(FILE *input_file, pilha_alunos pilha) {
+void read_alunos_num(FILE *input_file) {
     char linha[DIM];
     int num_linha = 1;
     while (fgets(linha, DIM, input_file)) { /*Se o fgets nao ler nada devolve NULL se ler devolve a string*/
-        pilha = validar_fich_alunos(elimina_final(linha), num_linha, pilha);
+        validar_fich_alunos(elimina_final(linha), num_linha);
         num_linha++;
     }
-    return pilha;
 }
 
 /*Verifica se o ficheiro esta no formato correto*/
-pilha_alunos validar_fich_alunos(char *linha, int num, pilha_alunos pilha) {
+void validar_fich_alunos(char *linha, int num) {
     char *nome;
     int num_est;
     regex_t linha_fich;
@@ -141,33 +134,32 @@ pilha_alunos validar_fich_alunos(char *linha, int num, pilha_alunos pilha) {
     if (regexec(&linha_fich, linha, 0, NULL, 0) == 0) {
         nome = trim(strtok(linha, "#"));
         num_est = atoi(strtok(NULL, "\n")); //todo remove atoi
-        pilha = push_aluno(nome, num_est, pilha);
+        push_aluno(nome, num_est);
     } else {
         fprintf(stderr, "Erro ao ler linha %d do ficheiro\n", num);
     }
-    return pilha;
 }
 
-void verfica_aprov(pilha_alunos pilha){
+void verfica_aprov(){
     pilha_disciplinas_aluno aux;
-    if(pilha == NULL) return;
-    while(pilha != NULL){
-        aux = pilha->info_aluno->pilha_notas;
+    if(pilha_al == NULL) return;
+    while(pilha_al != NULL){
+        aux = pilha_al->info_aluno->pilha_notas;
         if(aux == NULL) return;
         while(aux != NULL){
-            if(aux->med_final >= 9.45) pilha->info_aluno->aproved++;
+            if(aux->med_final >= 9.45) pilha_al->info_aluno->aproved++;
             aux = aux->next;
         }
-        pilha = pilha->next;
+        pilha_al = pilha_al->next;
     }
 }
 
-void alunos_aprov_file(pilha_alunos pilha){
+void alunos_aprov_file(){
     FILE *fp = fopen("Alunos_Aprovados.txt", "a");
-    if(pilha == NULL || fp == NULL) return;
-    while(pilha != NULL){
-        if(pilha->info_aluno->aproved >= 8) fprintf(fp, "%s\t%ld\n", pilha->info_aluno->nome_aluno, pilha->info_aluno->num_est);
-        pilha = pilha->next;
+    if(pilha_al == NULL || fp == NULL) return;
+    while(pilha_al != NULL){
+        if(pilha_al->info_aluno->aproved >= 8) fprintf(fp, "%s\t%ld\n", pilha_al->info_aluno->nome_aluno, pilha_al->info_aluno->num_est);
+        pilha_al = pilha_al->next;
     }
     fclose(fp);
 }
