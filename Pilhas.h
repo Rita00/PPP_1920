@@ -51,7 +51,7 @@ pilha_notas push_dis_to_aluno(char *prova, float nota, char *disciplina, pilha_n
 
 pilha_notas pesquisa_disciplina_aluno(char *disciplina, pilha_notas pilha);
 
-void print_pilha_disciplinas_aluno();
+void print_pilha_disciplinas_aluno(pilha_notas pilha);
 
 void destroi_pilha_notas(pilha_notas pilha);
 

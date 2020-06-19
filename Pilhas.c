@@ -427,7 +427,12 @@ void print_pilha_disciplinas_aluno(pilha_notas pilha) {
         return;
     }
     while (pilha != NULL) {
-        printf("%s:\n%s: %.2f\n%s: %.2f\n", pilha->disciplina, pilha->prova1, pilha->nota1, pilha->prova2, pilha->nota2);
+        if(pilha->prova1 == NULL){
+            printf("%s:\n%s: %.2f\n", pilha->disciplina, pilha->prova2, pilha->nota2);
+        }else if(pilha->prova2 == NULL){
+            printf("%s:\n%s: %.2f\n", pilha->disciplina, pilha->prova1, pilha->nota1);
+        }else
+            printf("%s:\n%s: %.2f\n%s: %.2f\n", pilha->disciplina, pilha->prova1, pilha->nota1, pilha->prova2, pilha->nota2);
         pilha = pilha->next;
     }
 }
@@ -499,7 +504,12 @@ void classificacao_final() {
     while (iterador != NULL) {
         aux = iterador->info_aluno->pilha_notas;
         while (aux != NULL) {
-            aux->med_final = (aux->nota1 + aux->nota2) / 2;
+            if(aux->prova1 == NULL){
+                aux->med_final = aux->nota2;
+            }else if(aux->prova2 == NULL){
+                aux->med_final = aux->nota1;
+            }else
+                aux->med_final = (aux->nota1 + aux->nota2) / 2;
             aux = aux->next;
         }
         iterador = iterador->next;

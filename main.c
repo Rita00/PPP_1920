@@ -21,7 +21,7 @@
 /*Paralelamente será construida uma pilha de disciplinas
  * cada elemento (disciplina) é constituído por uma pilha (ordenada alfabeticamente) de alunos que a frequentam*/
 
-// Caso o aluno so tenha realizado uma das duas provas de uma disciplina a média final considera apenas essa nota todo
+// Caso o aluno so tenha realizado uma das duas provas de uma disciplina a média final considera apenas essa nota
 
 
 #include <stdio.h>
