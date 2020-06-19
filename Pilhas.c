@@ -89,6 +89,12 @@ pilha_alunos remove_aluno(aluno pop_aluno) {
     }
 }
 
+pilha_alunos pop_aluno(long num_est) {
+    pilha_alunos aluno_rem = pesquisa_aluno(num_est);
+    remove_aluno(aluno_rem);
+    return aluno_rem;
+}
+
 /*Imprime lista alunos*/
 void print_lista_alunos() {
     pilha_alunos iterador = pilha_al;
@@ -161,7 +167,11 @@ void verfica_aprov() {
 
 void alunos_aprov_file() {
     pilha_alunos iterador = pilha_al;
-    FILE *fp = fopen("Alunos_Aprovados.txt", "a");
+    FILE *fp = fopen("Alunos_Aprovados.txt", "w");
+    if(fp == NULL){
+        fprintf(stderr, "Erro ao abrir o ficheiro \"Alunos_Aprovados.txt\"");
+        return;
+    }
     if (pilha_al == NULL || fp == NULL) return;
     while (iterador != NULL) {
         if (iterador->info_aluno->aproved >= 8)
@@ -321,11 +331,16 @@ void write_output() {
     if (pilha_disc == NULL) return;
     while (iterador != NULL) {
         sprintf(nome_ficheiro, "Pauta_%s.txt", iterador->disciplina->disc);
-        fp = fopen(nome_ficheiro, "a");
+        fp = fopen(nome_ficheiro, "w");
+        if(fp == NULL){
+            fprintf(stderr, "Erro ao abrir o ficheiro %s", nome_ficheiro);
+        }
         aux = iterador->disciplina->alunos;
         while (aux != NULL) {
+            pilha_notas notas = pesquisa_disciplina_aluno(iterador->disciplina->disc, aux->info_aluno->pilha_notas);
             fprintf(fp, "%s\t%.2f\n", aux->info_aluno->nome_aluno,
-                    pesquisa_disciplina_aluno(iterador->disciplina->disc, aux->info_aluno->pilha_notas)->med_final);
+                    notas->med_final);
+
             aux = aux->next;
         }
         iterador = iterador->next;
@@ -399,6 +414,12 @@ pilha_notas pesquisa_disciplina_aluno(char *disciplina, pilha_notas pilha) {
     return NULL;
 }
 
+pilha_notas pop_disciplina_aluno(char *disciplina, pilha_notas pilha){
+    pilha_notas aux = pesquisa_disciplina_aluno(disciplina,  pilha);
+
+    return aux;
+}
+
 /*Imprime lista de disciplinas com notas de um determinado aluno*/
 void print_pilha_disciplinas_aluno(pilha_notas pilha) {
     if (pilha == NULL) {
@@ -406,7 +427,7 @@ void print_pilha_disciplinas_aluno(pilha_notas pilha) {
         return;
     }
     while (pilha != NULL) {
-        printf("%s:\n%s: %f\n%s: %f\n", pilha->disciplina, pilha->prova1, pilha->nota1, pilha->prova2, pilha->nota2);
+        printf("%s:\n%s: %.2f\n%s: %.2f\n", pilha->disciplina, pilha->prova1, pilha->nota1, pilha->prova2, pilha->nota2);
         pilha = pilha->next;
     }
 }
@@ -493,7 +514,7 @@ void print_class_final() {
         printf("%s:\n", iterador->info_aluno->nome_aluno);
         aux = iterador->info_aluno->pilha_notas;
         while (aux != NULL) {
-            printf("\t%s: %f\n", aux->disciplina, aux->med_final);
+            printf("\t%s: %.2f\n", aux->disciplina, aux->med_final);
             aux = aux->next;
         }
         iterador = iterador->next;

@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include "structs.h"
 
-
 /****** Headers da interface da pilha de alunos */
 aluno aloc_aluno(char *nome, int num);
 
