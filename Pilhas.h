@@ -9,51 +9,53 @@ aluno aloc_aluno(char *nome, int num);
 
 void push_aluno(char *nome, int num);
 
-void read_alunos_num(FILE *input_file);
-
-void print_lista_alunos();
-
-void destroi_pilha_alunos(char destroi_info);
-
 aluno pesquisa_aluno(long num_aluno);
 
 pilha_alunos remove_aluno(aluno pop_aluno);
+
+aluno pop_aluno();
+
+void print_lista_alunos();
+
+void read_alunos_num(FILE *input_file);
 
 void validar_fich_alunos(char *linha, int num);
 
 void verfica_aprov();
 
-void alunos_aprov_file();
+void alunos_aprov_file(char *alunos_aprov);
 
 /****** Headers da interface da pilha de disciplinas */
+disciplina aloc_disciplina(char *disc);
+
 pilha_disciplinas push_disciplina(char *disc);
 
 pilha_disciplinas remove_disciplina(disciplina pop_disciplina);
 
-pilha_alunos push_aluno_to_disc(aluno aluno);
+disciplina pop_disciplina();
+
+pilha_alunos push_aluno_to_disc(aluno aluno, pilha_alunos lista_alunos);
 
 void print_pilha_disciplinas();
 
-void print_alunos_disciplina();
+void print_alunos_disciplina(pilha_alunos pilha);
 
 disciplina pesquisa_disciplina(char *disiciplina);
 
-void destroi_pilha_disciplinas();
-
-void write_output();
+void write_output(char *file_prefixe);
 
 /****** Headers da interface da pilha de notas de cada aluno */
-pilha_notas aloc_disciplina(char *prova, float nota, char *disciplina);
+lista_notas aloc_nota(char *prova, float nota, char *disciplina);
 
-char preencher_notas(char *prova, float nota, pilha_notas pilha);
+char preencher_notas(char *prova, float nota, lista_notas pilha);
 
-pilha_notas push_dis_to_aluno(char *prova, float nota, char *disciplina, pilha_notas pilha);
+lista_notas insere_dis_to_aluno(char *prova, float nota, char *disciplina, lista_notas pilha);
 
-pilha_notas pesquisa_disciplina_aluno(char *disciplina, pilha_notas pilha);
+lista_notas pesquisa_disciplina_aluno(char *disciplina, lista_notas pilha);
 
-void print_pilha_disciplinas_aluno(pilha_notas pilha);
+void print_lista_disciplinas_aluno(lista_notas pilha);
 
-void destroi_pilha_notas(pilha_notas pilha);
+void destroi_lista_notas(lista_notas pilha);
 
 pilha_disciplinas read_provas(FILE *input_file);
 

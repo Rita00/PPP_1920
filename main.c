@@ -1,13 +1,16 @@
-/* Na linha de comandos deve-se passar os argumentos "Lista_alunos_num_est.txt" e "Lista_Provas.txt", respetivamente
- * O primeiro ficheiro contem o nome e numero de estudante de cada aluno
- * O segundo ficheiro as respetivas disciplinas e notas */
+/* Na linha de comandos deve-se passar os argumentos "Lista_alunos_num_est.txt", "Lista_Provas.txt",
+ * "Pauta_" e "Alunos_Aprovados.txt", respetivamente
+ * O primeiro ficheiro contém o nome e número de estudante de cada aluno
+ * O segundo ficheiro as respetivas disciplinas e notas
+ * O terceiro argumento vai gerar 10 ficheiros com as respetivas pautas a cada disciplina
+ * O quarto ficheiro gera uma lista com os alunos que tiveram sucesso escolar */
 
 /* Na main é apresentado um menu que serviu para testar código exclusivamente.
  * Caso o utilizador prima a tecla 0 (que sai do menu) o programa executa o seu principal objetivo que é gerar pautas
  * (uma para cada disciplina e uma final de quem passou de ano). */
 
 /* Mesmo no menu cujo objetivo foi testar código optei por usar programação defensiva
- * sendo possivel apenas a introdução de números por parte do utilizador
+ * sendo possível apenas a introdução de números por parte do utilizador
  * com tamanho máximo 999.999.999.999.999.999 para aceitar os números de estudante semelhantes aos da UC */
 
 /* Para ler os ficheiros usei regex´s que validam ou invalidam determinada linha lida.
@@ -16,16 +19,16 @@
  * seguinte site: https://stackoverflow.com/questions/656542/trim-a-string-in-c */
 
 /* O programa é composto por uma pilha de alunos
- * cada elemento (aluno) dessa pilha é constituido por uma pilha de disciplinas que contém as respetivas notas */
+ * cada elemento (aluno) dessa pilha contém uma lista de notas */
 
 /*Paralelamente será construida uma pilha de disciplinas
- * cada elemento (disciplina) é constituído por uma pilha (ordenada alfabeticamente) de alunos que a frequentam*/
+ * cada elemento (disciplina) contém uma lista (ordenada lexicograficamente) de alunos que a frequentam */
 
-// Caso o aluno so tenha realizado uma das duas provas de uma disciplina a média final considera apenas essa nota
+// Caso o aluno só tenha realizado uma das duas provas de uma disciplina a média final considera apenas essa nota
 
 
 #include <stdio.h>
-#include <memory.h>
+#include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include "Pilhas.h"
@@ -35,13 +38,10 @@
 
 int main(int argc, char *argv[]) {
     // Verifica se existem todos os ficheiros necessários à execução do programa
-    if (argc < 3) {
-        fprintf(stderr, "Sem argumentos\n");
+    if (argc < 5) {
+        fprintf(stderr, "Sem argumentos suficientes\n");
         return -1;
     }
-
-    //pilha_alunos pilha_al = NULL;
-    //pilha_disciplinas pilha_disc = NULL;
 
     FILE *file_alunos = fopen(argv[1], "r");
     if (file_alunos == NULL){
@@ -82,7 +82,6 @@ int main(int argc, char *argv[]) {
         switch (opcao) {
             case 1:
                 print_lista_alunos();
-                printf("Olá\n");
                 break;
             case 2:
                 print_pilha_disciplinas();
@@ -95,7 +94,7 @@ int main(int argc, char *argv[]) {
                     printf("Aluno Inexistente\n");
                     break;
                 }
-                print_pilha_disciplinas_aluno(pesq_aluno->pilha_notas);
+                print_lista_disciplinas_aluno(pesq_aluno->notas);
                 break;
             case 4:
                 printf("Nome da disciplina\n");
@@ -134,11 +133,9 @@ int main(int argc, char *argv[]) {
                 break;
         }
     }
-    write_output();
-    alunos_aprov_file();
-    destroi_pilha_alunos(1);
-    destroi_pilha_disciplinas();
-};
+    write_output(argv[3]);
+    alunos_aprov_file(argv[4]);
+}
 
 //Protecao de dados
 void clear_input() {
@@ -199,13 +196,13 @@ char *elimina_final(char *linha) {
 
 
 char *ltrim(char *s) {
-    while (isspace(*s)) s++;
+    while (isspace((unsigned)*s)) s++;
     return s;
 }
 
 char *rtrim(char *s) {
     char *back = s + strlen(s);
-    while (isspace(*--back));
+    while (isspace((unsigned)*--back));
     *(back + 1) = '\0';
     return s;
 }

@@ -5,12 +5,13 @@
 #include "Pilhas.h"
 
 #define DIM 200
+#define DEBUG 0 //For Testing Purposes Only
 
-static pilha_alunos pilha_al;
-static pilha_disciplinas pilha_disc;
+static pilha_alunos pilha_al = NULL;
+static pilha_disciplinas pilha_disc = NULL;
 
 /****** Interface da pilha de alunos */
-/*Alocacao de no da pilha*/
+//Alocação de nó de uma aluno
 aluno aloc_aluno(char *nome, int num) {
     aluno novo_aluno = (aluno) calloc(1, sizeof(struct _alunos));
     novo_aluno->nome_aluno = strdup(nome);
@@ -18,14 +19,14 @@ aluno aloc_aluno(char *nome, int num) {
     return novo_aluno;
 }
 
-/*Inserir na lista*/
+//Adicionar um nó na pilha alunos
 void push_aluno(char *nome, int num) {
     pilha_alunos novo_aluno = (pilha_alunos) calloc(1, sizeof(struct _pilha_alunos));
     pilha_alunos aux = pilha_al;
 
-    if (!aux || strcasecmp(aux->info_aluno->nome_aluno, nome) >= 0) {
-        if (aux && strcasecmp(aux->info_aluno->nome_aluno, nome) == 0) {
-            //printf("Nome ja exixtente\n");
+    if (aux == NULL || strcasecmp(aux->info_aluno->nome_aluno, nome) >= 0) {
+        if (aux != NULL && strcasecmp(aux->info_aluno->nome_aluno, nome) == 0) {
+            if (DEBUG) printf("Nome ja exixtente\n");
         }
         novo_aluno->info_aluno = aloc_aluno(nome, num);
         novo_aluno->next = aux;
@@ -35,7 +36,7 @@ void push_aluno(char *nome, int num) {
             aux = aux->next;
         }
         if (aux->next && strcasecmp(aux->next->info_aluno->nome_aluno, nome) == 0) {
-            //printf("Nome ja existente\n");
+            if (DEBUG) printf("Nome ja existente\n");
         } else {
             novo_aluno->info_aluno = aloc_aluno(nome, num);
             novo_aluno->next = aux->next;
@@ -44,11 +45,11 @@ void push_aluno(char *nome, int num) {
     }
 }
 
-/*Pesquisar determinado aluno por nome*/
-aluno pesquisa_aluno(long num_aluno) { //todo change return ???
+/* Pesquisar determinado aluno por número de estudante */
+aluno pesquisa_aluno(long num_aluno) {
     pilha_alunos aux = pilha_al;
     if (pilha_al == NULL) {
-        //printf("Lista Vazia\n");
+        if (DEBUG) printf("Lista Vazia\n");
     } else {
         while (aux && aux->info_aluno->num_est != num_aluno) {
             aux = aux->next;
@@ -60,26 +61,29 @@ aluno pesquisa_aluno(long num_aluno) { //todo change return ???
     return NULL;
 }
 
-/*Remover um aluno da lista*/
+//Remover um aluno da pilha de alunos
 pilha_alunos remove_aluno(aluno pop_aluno) {
     pilha_alunos aux = pilha_al, aux_rem;
 
     if (pilha_al == NULL) {
-        //printf("Lista Vazia\n");
+        if (DEBUG) printf("Lista Vazia\n");
         return pilha_al;
-    } else if (pilha_al->next == NULL) { //A lista tem apenas 1 no
-        free(pilha_al);
+    } else if (pilha_al->next == NULL) { //A pilha tem apenas 1 no
+        aux_rem = pilha_al;
+        pilha_al = pilha_al->next;
+        free(aux_rem);
         return pilha_al;
     } else if (pilha_al->info_aluno == pop_aluno) { //Primeiro aluno da pilha a remover
-        aux_rem = pilha_al->next;
-        free(pilha_al);
-        return aux_rem;
+        aux_rem = pilha_al;
+        pilha_al = pilha_al->next;
+        free(aux_rem);
+        return pilha_al;
     } else {
         while (aux && aux->next && aux->next->info_aluno != pop_aluno) {
             aux = aux->next;
         }
         if (aux->next == NULL) {
-            //printf("Numero de aluno inexistente\n");
+            if (DEBUG) printf("Numero de aluno inexistente\n");
             return pilha_al;
         }
         aux_rem = aux->next->next;
@@ -89,17 +93,18 @@ pilha_alunos remove_aluno(aluno pop_aluno) {
     }
 }
 
-pilha_alunos pop_aluno(long num_est) {
-    pilha_alunos aluno_rem = pesquisa_aluno(num_est);
-    remove_aluno(aluno_rem);
-    return aluno_rem;
+//Pop de um aluno, sempre no topo da pilha
+aluno pop_aluno() {
+    aluno rem_aluno = pilha_al->info_aluno;
+    remove_aluno(pilha_al->info_aluno);
+    return rem_aluno;
 }
 
-/*Imprime lista alunos*/
+//Imprime lista alunos de uma determinada disciplina
 void print_lista_alunos() {
     pilha_alunos iterador = pilha_al;
     if (pilha_al == NULL) {
-        //printf("Lista Vazia\n");
+        if (DEBUG) printf("Lista Vazia\n");
         return;
     }
     while (iterador != NULL) {
@@ -108,32 +113,17 @@ void print_lista_alunos() {
     }
 }
 
-/*Destroi lista*/
-void destroi_pilha_alunos(char destroi_info) {
-    pilha_alunos aux;
-    while (pilha_al != NULL) {
-        aux = pilha_al;
-        pilha_al = pilha_al->next;
-        if (destroi_info && aux->info_aluno != NULL) {
-            if (aux->info_aluno->pilha_notas != NULL)
-                destroi_pilha_notas(aux->info_aluno->pilha_notas);
-            free(aux->info_aluno);
-        }
-        free(aux);
-    }
-}
-
-/*Le ficheiro de texto recebido como input e insere alunos na lista*/
+//Lê ficheiro de texto recebido como input
 void read_alunos_num(FILE *input_file) {
     char linha[DIM];
     int num_linha = 1;
-    while (fgets(linha, DIM, input_file)) { /*Se o fgets nao ler nada devolve NULL se ler devolve a string*/
+    while (fgets(linha, DIM, input_file)) { //Se o fgets nao ler nada devolve NULL se ler devolve a string
         validar_fich_alunos(elimina_final(linha), num_linha);
         num_linha++;
     }
 }
 
-/*Verifica se o ficheiro esta no formato correto*/
+//Verifica se a linha lida está no formato correto
 void validar_fich_alunos(char *linha, int num) {
     char *nome;
     int num_est;
@@ -142,20 +132,22 @@ void validar_fich_alunos(char *linha, int num) {
     regcomp(&linha_fich, "[A-Za-z ]+#[0-9]+$", REG_EXTENDED);
     if (regexec(&linha_fich, linha, 0, NULL, 0) == 0) {
         nome = trim(strtok(linha, "#"));
-        num_est = atoi(strtok(NULL, "\n")); //todo remove atoi
-        push_aluno(nome, num_est);
+        num_est = atoi(strtok(NULL, "\n"));
+        push_aluno(nome, num_est); //Insere aluno na pilha (pilha_al)
     } else {
+        //Caso a linha não esteja no formato correto apresenta erro
         fprintf(stderr, "Erro ao ler linha %d do ficheiro de alunos\n", num);
     }
 }
 
+//Verfica se um determinado aluno está aprovado às diferentes cadeiras a que está inscrito
 void verfica_aprov() {
-    pilha_notas aux;
+    lista_notas aux;
     pilha_alunos iterador;
     if (pilha_al == NULL) return;
     iterador = pilha_al;
     while (iterador != NULL) {
-        aux = iterador->info_aluno->pilha_notas;
+        aux = iterador->info_aluno->notas;
         if (aux == NULL) return;
         while (aux != NULL) {
             if (aux->med_final >= 9.45) iterador->info_aluno->aproved++;
@@ -165,50 +157,55 @@ void verfica_aprov() {
     }
 }
 
-void alunos_aprov_file() {
-    pilha_alunos iterador = pilha_al;
-    FILE *fp = fopen("Alunos_Aprovados.txt", "w");
-    if(fp == NULL){
-        fprintf(stderr, "Erro ao abrir o ficheiro \"Alunos_Aprovados.txt\"");
-        return;
+//Escreve para um ficheiro os alunos que tiveram sucesso escolar
+void alunos_aprov_file(char *alunos_aprov) {
+    aluno rem;
+    FILE *fp = fopen(alunos_aprov, "w");
+    if (fp == NULL) {
+        fprintf(stderr, "Erro ao abrir o ficheiro %s\n", alunos_aprov);
+        exit(-1);
     }
     if (pilha_al == NULL || fp == NULL) return;
-    while (iterador != NULL) {
-        if (iterador->info_aluno->aproved >= 8)
-            fprintf(fp, "%s\t%ld\n", iterador->info_aluno->nome_aluno, iterador->info_aluno->num_est);
-        iterador = iterador->next;
+    while (pilha_al != NULL) {
+        rem = pop_aluno();
+        if (rem->aproved >= 8)
+            fprintf(fp, "%s\t%ld\n", rem->nome_aluno, rem->num_est);
+        destroi_lista_notas(rem->notas);
+        free(rem);
     }
     fclose(fp);
 }
 
 /****** Interface da pilha de disciplinas */
-disciplina aloc_disc(char *disc) {
+//Alocação de nó de uma disciplina
+disciplina aloc_disciplina(char *disc) {
     disciplina nova_disciplina = (disciplina) calloc(1, sizeof(struct _disciplinas));
-    nova_disciplina->disc = strdup(disc);
+    nova_disciplina->nome_disc = strdup(disc);
     return nova_disciplina;
 }
 
+//Adicionar um nó na pilha disciplinas
 pilha_disciplinas push_disciplina(char *disc) {
     pilha_disciplinas nova_disciplina = (pilha_disciplinas) calloc(1, sizeof(struct _pilha_disciplinas));
     pilha_disciplinas aux = pilha_disc;
 
-    if (pilha_disc == NULL || strcasecmp(pilha_disc->disciplina->disc, disc) >= 0) {
-        if (pilha_disc != NULL && strcasecmp(pilha_disc->disciplina->disc, disc) == 0) {
-            //printf("Disiciplina ja existente\n");
+    if (pilha_disc == NULL || strcasecmp(pilha_disc->info_disciplina->nome_disc, disc) >= 0) {
+        if (pilha_disc != NULL && strcasecmp(pilha_disc->info_disciplina->nome_disc, disc) == 0) {
+            if (DEBUG) printf("Disiciplina ja existente\n");
             return pilha_disc;
         }
-        nova_disciplina->disciplina = aloc_disc(disc);
+        nova_disciplina->info_disciplina = aloc_disciplina(disc);
         nova_disciplina->next = pilha_disc;
         return nova_disciplina;
     } else {
-        while (aux->next && strcasecmp(aux->next->disciplina->disc, disc) < 0) {
+        while (aux->next && strcasecmp(aux->next->info_disciplina->nome_disc, disc) < 0) {
             aux = aux->next;
         }
-        if (aux->next && strcasecmp(aux->next->disciplina->disc, disc) == 0) {
-            //printf("Disciplina ja existente\n");
+        if (aux->next && strcasecmp(aux->next->info_disciplina->nome_disc, disc) == 0) {
+            if (DEBUG) printf("Disciplina ja existente\n");
             return pilha_disc;
         } else {
-            nova_disciplina->disciplina = aloc_disc(disc);
+            nova_disciplina->info_disciplina = aloc_disciplina(disc);
             nova_disciplina->next = aux->next;
             aux->next = nova_disciplina;
         }
@@ -216,25 +213,29 @@ pilha_disciplinas push_disciplina(char *disc) {
     return pilha_disc;
 }
 
+//Remover uma disciplina da pilha de disciplinas
 pilha_disciplinas remove_disciplina(disciplina pop_disciplina) {
     pilha_disciplinas aux = pilha_disc, aux_rem;
 
     if (pilha_disc == NULL) {
-        //printf("Lista Vazia\n");
+        if (DEBUG) printf("Lista Vazia\n");
         return pilha_disc;
     } else if (pilha_disc->next == NULL) { //A lista tem apenas 1 no
-        free(pilha_disc);
+        aux_rem = pilha_disc;
+        pilha_disc = pilha_disc->next;
+        free(aux_rem);
         return pilha_disc;
-    } else if (pilha_disc->disciplina == pop_disciplina) { //Primeiro aluno da pilha a remover
-        aux_rem = pilha_disc->next;
-        free(pilha_disc);
-        return aux_rem;
+    } else if (pilha_disc->info_disciplina == pop_disciplina) { //Primeiro aluno da pilha a remover
+        aux_rem = pilha_disc;
+        pilha_disc = pilha_disc->next;
+        free(aux_rem);
+        return pilha_disc;
     } else {
-        while (aux && aux->next && aux->next->disciplina != pop_disciplina) {
+        while (aux && aux->next && aux->next->info_disciplina != pop_disciplina) {
             aux = aux->next;
         }
         if (aux->next == NULL) {
-            //printf("Numero de aluno inexistente\n");
+            if (DEBUG) printf("Numero de aluno inexistente\n");
             return pilha_disc;
         }
         aux_rem = aux->next->next;
@@ -244,37 +245,42 @@ pilha_disciplinas remove_disciplina(disciplina pop_disciplina) {
     }
 }
 
-pilha_disciplinas pop_disciplina(char *pop_dis) {
-    return remove_disciplina(pesquisa_disciplina(pop_dis));
+//Pop de uma disciplina, sempre no topo da pilha
+disciplina pop_disciplina() {
+    disciplina rem_disc = pilha_disc->info_disciplina;
+    remove_disciplina(pilha_disc->info_disciplina);
+    return rem_disc;
 }
 
-pilha_alunos push_aluno_to_disc(aluno aluno) {
+//Adiciona um aluno à lista de alunos de uma determinada disciplina
+pilha_alunos push_aluno_to_disc(aluno aluno, pilha_alunos lista_alunos) {
     pilha_alunos novo_aluno = (pilha_alunos) calloc(1, sizeof(struct _pilha_alunos));
-    pilha_alunos aux = pilha_al;
-    if (pilha_al == NULL || strcasecmp(pilha_al->info_aluno->nome_aluno, aluno->nome_aluno) >= 0) {
-        if (pilha_al != NULL && pilha_al->info_aluno->num_est == aluno->num_est) {
-            //printf("Aluno ja existente\n");
-            return pilha_al;
+    pilha_alunos aux = lista_alunos;
+    if (lista_alunos == NULL || strcasecmp(lista_alunos->info_aluno->nome_aluno, aluno->nome_aluno) >= 0) {
+        if (lista_alunos != NULL && lista_alunos->info_aluno->num_est == aluno->num_est) {
+            if (DEBUG) printf("Aluno ja existente\n");
+            return lista_alunos;
         }
         novo_aluno->info_aluno = aluno;
-        novo_aluno->next = pilha_al;
+        novo_aluno->next = lista_alunos;
         return novo_aluno;
     } else {
         while (aux->next && strcasecmp(aux->next->info_aluno->nome_aluno, aluno->nome_aluno) < 0) {
             aux = aux->next;
         }
         if (aux->next && aux->next->info_aluno->num_est == aluno->num_est) {
-            //printf("Aluno ja existente\n");
-            return pilha_al;
+            if (DEBUG) printf("Aluno ja existente\n");
+            return lista_alunos;
         } else {
             novo_aluno->info_aluno = aluno;
             novo_aluno->next = aux->next;
             aux->next = novo_aluno;
         }
     }
-    return pilha_al;
+    return lista_alunos;
 }
 
+//Lista todas as disciplinas da pilha de disciplinas
 void print_pilha_disciplinas() {
     pilha_disciplinas iterador = pilha_disc;
     if (pilha_disc == NULL) {
@@ -282,14 +288,15 @@ void print_pilha_disciplinas() {
         return;
     }
     while (iterador != NULL) {
-        printf("%s\n", iterador->disciplina->disc);
+        printf("%s\n", iterador->info_disciplina->nome_disc);
         iterador = iterador->next;
     }
 }
 
-void print_alunos_disciplina() {
-    pilha_alunos iterador = pilha_al;
-    if (pilha_al == NULL) {
+//Lista todos os alunos de uma determinada disciplina
+void print_alunos_disciplina(pilha_alunos pilha) {
+    pilha_alunos iterador = pilha;
+    if (pilha == NULL) {
         printf("Pilha Vazia\n");
         return;
     }
@@ -299,64 +306,61 @@ void print_alunos_disciplina() {
     }
 }
 
+//Pesquisa uma determinada disciplina na pilha de disciplinas
 disciplina pesquisa_disciplina(char *disiciplina) {
     pilha_disciplinas aux = pilha_disc;
     if (pilha_disc == NULL) {
-        //printf("Pilha de disciplinas vazia\n");
-        return NULL; //todo verificar o null
+        if (DEBUG) printf("Pilha de disciplinas vazia\n");
+        return NULL;
     } else {
-        while (aux && strcasecmp(aux->disciplina->disc, disiciplina) != 0) {
+        while (aux && strcasecmp(aux->info_disciplina->nome_disc, disiciplina) != 0) {
             aux = aux->next;
         }
-        if (aux) return aux->disciplina;
+        if (aux) return aux->info_disciplina;
     }
     return NULL;
 }
 
-/*Destroi Pilha de disciplinas e respetiva pilha de alunos de cada disciplina*/
-void destroi_pilha_disciplinas() {
-    pilha_disciplinas aux;
-    while (pilha_disc != NULL) {
-        aux = pilha_disc->next;
-        free(pilha_disc);
-        pilha_disc = aux;
-    }
-}
-
-void write_output() {
-    pilha_disciplinas iterador = pilha_disc;
+//Escreve em 10 ficheiros (1 para cada disciplina) a lista de alunos inscritos e respetivos resultados nas provas
+void write_output(char *file_prefixe) {
     FILE *fp;
-    pilha_alunos aux;
+    pilha_alunos aux, aux_rem;
+    disciplina rem;
     char nome_ficheiro[DIM];
     if (pilha_disc == NULL) return;
-    while (iterador != NULL) {
-        sprintf(nome_ficheiro, "Pauta_%s.txt", iterador->disciplina->disc);
+    while (pilha_disc != NULL) {
+        rem = pop_disciplina();
+        sprintf(nome_ficheiro, "%s%s.txt", file_prefixe, rem->nome_disc);
         fp = fopen(nome_ficheiro, "w");
-        if(fp == NULL){
-            fprintf(stderr, "Erro ao abrir o ficheiro %s", nome_ficheiro);
+        if (fp == NULL) {
+            fprintf(stderr, "Erro ao abrir o ficheiro %s\n", nome_ficheiro);
+            exit(-1);
         }
-        aux = iterador->disciplina->alunos;
+        aux = rem->alunos;
         while (aux != NULL) {
-            pilha_notas notas = pesquisa_disciplina_aluno(iterador->disciplina->disc, aux->info_aluno->pilha_notas);
-            fprintf(fp, "%s\t%.2f\n", aux->info_aluno->nome_aluno,
-                    notas->med_final);
-
+            lista_notas notas = pesquisa_disciplina_aluno(rem->nome_disc, aux->info_aluno->notas);
+            fprintf(fp, "%s\t%.2f\n", aux->info_aluno->nome_aluno, notas->med_final);
+            aux_rem = aux;
             aux = aux->next;
+            free(aux_rem);
         }
-        iterador = iterador->next;
+        free(rem);
         fclose(fp);
     }
 }
 
 /****** Interface da pilha de disciplinas */
-pilha_notas aloc_disciplina(char *prova, float nota, char *disciplina) {
-    pilha_notas nova_disciplina = (pilha_notas) calloc(1, sizeof(struct _notas_alunos));
-    nova_disciplina->disciplina = strdup(disciplina);
+//Alocação de nó de uma nota
+lista_notas aloc_nota(char *prova, float nota, char *disciplina) {
+    lista_notas nova_disciplina = (lista_notas) calloc(1, sizeof(struct _notas_alunos));
+    nova_disciplina->disc = strdup(disciplina);
     if (preencher_notas(prova, nota, nova_disciplina) != 0) return NULL;
     return nova_disciplina;
 }
 
-char preencher_notas(char *prova, float nota, pilha_notas disciplina) {
+//Preenche no campo certo a respetiva nota e prova recebida
+char preencher_notas(char *prova, float nota, lista_notas disciplina) {
+    //Verifica que nota deve preencher (nota1 ou nota2)
     if (strcasecmp(prova, "prova1") == 0) {
         disciplina->nota1 = nota;
         disciplina->prova1 = strdup(prova);
@@ -366,31 +370,33 @@ char preencher_notas(char *prova, float nota, pilha_notas disciplina) {
         disciplina->prova2 = prova;
         return 0;
     }
-    //printf("Disciplina com notas completas\n");
+    if (DEBUG) printf("Disciplina com notas completas\n");
     return 1;
 }
 
-pilha_notas push_dis_to_aluno(char *prova, float nota, char *disciplina, pilha_notas pilha) {
-    pilha_notas nova_nota;
-    pilha_notas aux = pilha;
+//Insere uma nota na lista de notas de um determinado aluno
+lista_notas insere_dis_to_aluno(char *prova, float nota, char *disciplina, lista_notas pilha) {
+    lista_notas nova_nota;
+    lista_notas aux = pilha;
 
-    if (pilha == 0 || strcasecmp(pilha->disciplina, disciplina) >= 0) {
-        if (pilha != 0 && strcasecmp(pilha->disciplina, disciplina) == 0) {
+    if (pilha == NULL || strcasecmp(pilha->disc, disciplina) >= 0) {
+        if (pilha != NULL && strcasecmp(pilha->disc, disciplina) == 0) { //Se for o primeiro nó, preencher notas
             preencher_notas(prova, nota, pilha);
             return pilha;
         }
-        aux = aloc_disciplina(prova, nota, disciplina);
+        aux = aloc_nota(prova, nota, disciplina); //Se a lista tiver vazia
         aux->next = pilha;
         return aux;
     } else {
-        while (aux->next && strcasecmp(aux->next->disciplina, disciplina) < 0) {
+        while (aux->next && strcasecmp(aux->next->disc, disciplina) < 0) {
             aux = aux->next;
         }
-        if (aux->next && strcasecmp(aux->next->disciplina, disciplina) == 0) {
+        if (aux->next && strcasecmp(aux->next->disc, disciplina) == 0) {
             preencher_notas(prova, nota, aux->next);
-            return pilha;
+            return pilha; //Se existe já a disciplina, acabar de preencher notas
         } else {
-            nova_nota = aloc_disciplina(prova, nota, disciplina);
+            //Se a disciplina não existe na pilha, inserir
+            nova_nota = aloc_nota(prova, nota, disciplina);
             nova_nota->next = aux->next;
             aux->next = nova_nota;
         }
@@ -398,48 +404,42 @@ pilha_notas push_dis_to_aluno(char *prova, float nota, char *disciplina, pilha_n
     return pilha;
 }
 
-/*Pesquisa uma determinada disciplina de um aluno*/
-pilha_notas pesquisa_disciplina_aluno(char *disciplina, pilha_notas pilha) {
-    pilha_notas aux = pilha;
+//Pesquisa uma determinada disciplina de um aluno
+lista_notas pesquisa_disciplina_aluno(char *disciplina, lista_notas pilha) {
+    lista_notas aux = pilha;
     if (pilha == NULL) {
-        //printf("Pilha Vazia. Aluno nao inscrito em disciplinas\n");
+        if (DEBUG) printf("Pilha Vazia. Aluno nao inscrito em disciplinas\n");
     } else {
-        while (aux != NULL && strcasecmp(aux->disciplina, disciplina) != 0) {
+        while (aux != NULL && strcasecmp(aux->disc, disciplina) != 0) {
             aux = aux->next;
         }
-        if (aux && strcasecmp(aux->disciplina, disciplina) == 0) {
+        if (aux && strcasecmp(aux->disc, disciplina) == 0) {
             return aux;
         }
     }
     return NULL;
 }
 
-pilha_notas pop_disciplina_aluno(char *disciplina, pilha_notas pilha){
-    pilha_notas aux = pesquisa_disciplina_aluno(disciplina,  pilha);
-
-    return aux;
-}
-
-/*Imprime lista de disciplinas com notas de um determinado aluno*/
-void print_pilha_disciplinas_aluno(pilha_notas pilha) {
+//Imprime lista de notas de um determinado aluno
+void print_lista_disciplinas_aluno(lista_notas pilha) {
     if (pilha == NULL) {
-        //printf("Pilha Vazia\n");
+        if (DEBUG) printf("Pilha Vazia\n");
         return;
     }
     while (pilha != NULL) {
-        if(pilha->prova1 == NULL){
-            printf("%s:\n%s: %.2f\n", pilha->disciplina, pilha->prova2, pilha->nota2);
-        }else if(pilha->prova2 == NULL){
-            printf("%s:\n%s: %.2f\n", pilha->disciplina, pilha->prova1, pilha->nota1);
-        }else
-            printf("%s:\n%s: %.2f\n%s: %.2f\n", pilha->disciplina, pilha->prova1, pilha->nota1, pilha->prova2, pilha->nota2);
+        if (pilha->prova1 == NULL) {
+            printf("%s:\n%s: %.2f\n", pilha->disc, pilha->prova2, pilha->nota2);
+        } else if (pilha->prova2 == NULL) {
+            printf("%s:\n%s: %.2f\n", pilha->disc, pilha->prova1, pilha->nota1);
+        } else
+            printf("%s:\n%s: %.2f\n%s: %.2f\n", pilha->disc, pilha->prova1, pilha->nota1, pilha->prova2, pilha->nota2);
         pilha = pilha->next;
     }
 }
 
-/*Destroi lista disciplinas*/
-void destroi_pilha_notas(pilha_notas pilha) {
-    pilha_notas aux;
+//Destroi lista disciplinas
+void destroi_lista_notas(lista_notas pilha) {
+    lista_notas aux;
     while (pilha != NULL) {
         aux = pilha;
         pilha = pilha->next;
@@ -447,6 +447,7 @@ void destroi_pilha_notas(pilha_notas pilha) {
     }
 }
 
+//Lê ficheiro "Lista_Provas.txt"
 pilha_disciplinas read_provas(FILE *input_file) {
     char linha[DIM];
     int num_linha = 1;
@@ -457,6 +458,7 @@ pilha_disciplinas read_provas(FILE *input_file) {
     return pilha_disc;
 }
 
+//Valida linhas de ficheiro "Lista_Provas.txt" e insere na lista de provas de um determinado aluno
 pilha_disciplinas validar_fich_disc(char *linha, int num_linha) {
     int num_est;
     char *discp;
@@ -473,21 +475,21 @@ pilha_disciplinas validar_fich_disc(char *linha, int num_linha) {
         num_est = atoi(strtok(linha, "#"));
         aluno = pesquisa_aluno(num_est);
         if (aluno == NULL) {
-            //printf("Numero invalido\n");
+            if (DEBUG) printf("Numero invalido\n");
             return pilha_disc;
         }
         discp = strdup(strtok(NULL, "#"));
         prova = strdup(strtok(NULL, "#"));
-        nota = atof(strtok(NULL, "\n")); //todo mudar atoi e atof
+        nota = (float) atof(strtok(NULL, "\n"));
 
-        aluno->pilha_notas = push_dis_to_aluno(prova, nota, discp, aluno->pilha_notas);
+        aluno->notas = insere_dis_to_aluno(prova, nota, discp, aluno->notas);
         pilha_disc = push_disciplina(discp);
         disc = pesquisa_disciplina(discp);
         if (disc == NULL) {
-            //printf("Disciplina Inexistente\n");
+            if (DEBUG) printf("Disciplina Inexistente\n");
             return pilha_disc;
         }
-        disc->alunos = push_aluno_to_disc(aluno);
+        disc->alunos = push_aluno_to_disc(aluno, disc->alunos);
         return pilha_disc;
 
     } else {
@@ -496,19 +498,20 @@ pilha_disciplinas validar_fich_disc(char *linha, int num_linha) {
     return pilha_disc;
 }
 
+//Calcula a classificação final de todos os alunos a todas as disciplinas
 void classificacao_final() {
-    pilha_notas aux;
+    lista_notas aux;
     pilha_alunos iterador;
-    if (pilha_al == NULL) return; //todo print pilha vazia??
+    if (pilha_al == NULL) return;
     iterador = pilha_al;
     while (iterador != NULL) {
-        aux = iterador->info_aluno->pilha_notas;
+        aux = iterador->info_aluno->notas;
         while (aux != NULL) {
-            if(aux->prova1 == NULL){
+            if (aux->prova1 == NULL) {
                 aux->med_final = aux->nota2;
-            }else if(aux->prova2 == NULL){
+            } else if (aux->prova2 == NULL) {
                 aux->med_final = aux->nota1;
-            }else
+            } else
                 aux->med_final = (aux->nota1 + aux->nota2) / 2;
             aux = aux->next;
         }
@@ -516,15 +519,16 @@ void classificacao_final() {
     }
 }
 
+//Lista as classificações finais de todos os alunos a todas as disciplinas
 void print_class_final() {
     pilha_alunos iterador = pilha_al;
-    pilha_notas aux;
+    lista_notas aux;
     if (pilha_al == NULL) return;
     while (iterador != NULL) {
         printf("%s:\n", iterador->info_aluno->nome_aluno);
-        aux = iterador->info_aluno->pilha_notas;
+        aux = iterador->info_aluno->notas;
         while (aux != NULL) {
-            printf("\t%s: %.2f\n", aux->disciplina, aux->med_final);
+            printf("\t%s: %.2f\n", aux->disc, aux->med_final);
             aux = aux->next;
         }
         iterador = iterador->next;
